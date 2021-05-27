@@ -9,6 +9,7 @@ import java.util.ServiceLoader;
  **/
 public class Test {
     public static void main(String[] args) {
+        //加载接口
         ServiceLoader<ISearch> s = ServiceLoader.load(ISearch.class);
         Iterator<ISearch> iterator = s.iterator();
         while (iterator.hasNext()) {
