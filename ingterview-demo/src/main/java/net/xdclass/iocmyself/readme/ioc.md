@@ -73,3 +73,27 @@ getCandidateConfigurations方法返回的configurations与spring.factories配置
 ![img_13.png](img_13.png)
 
 初始化：
+  
+这里就是Bean的生命周期的管理
+###1、先进行 实例化
+BeanFactory接口做了什么事情？？  
+***bean的生命周期***
+![img_14.png](img_14.png)
+
+注意**BeanPostProcessor**的类型
+![img_15.png](img_15.png)  
+
+BeanPostProcessor这个接口也是提供拓展使用的  
+
+![img_6.png](img_6.png) ![img_16.png](img_16.png)
+**AOP是在初始化操作之前实现的**
+###FactoryBean feign
+feign源码  FeignClientFactoryBean impl FactoryBean  
+
+定制的特殊的对象  
+
+**一般情况下用BeanFactory创建，特殊情况用FactoryBean创建对象**
+
+![img_17.png](img_17.png)
+
+###
