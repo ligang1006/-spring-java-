@@ -15,7 +15,7 @@ public class Test2 {
         Class<? extends UserController> clazz = userController.getClass();
         //获取属性
 //        Field[] declaredFields = clazz.getDeclaredFields();
-        Stream.of(clazz.getFields()).forEach(field -> {
+        Stream.of(clazz.getDeclaredFields()).forEach(field -> {
             //当发现的属性被@Autowired注解的时，需要注入
             Autowired annotation = field.getAnnotation(Autowired.class);
             if (annotation != null) {
@@ -36,5 +36,6 @@ public class Test2 {
 
             }
         });
+        System.out.println(userController.getUserService());
     }
 }
