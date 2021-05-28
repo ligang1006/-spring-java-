@@ -28,5 +28,48 @@ BeanDefinitionRegistry 注册Bean
 ![img_4.png](img_4.png)
 
 BeanDefinition和BeanFactory之间也有东西
-下图是BeanFactoryPostProcessor
+下图是BeanFactoryPostProcessor**这里完成了拓展增强的功能**
+
 ![img_5.png](img_5.png)
+![img_6.png](img_6.png)  
+
+internalConfigurationProcessor
+![img_7.png](img_7.png)
+
+@SpringBootApplication->@EnableAutoConfiguration
+![img_8.png](img_8.png)
+AutoConfigurationImportSelector
+```
+protected List<String> getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) {
+List<String> configurations = SpringFactoriesLoader.loadFactoryNames(getSpringFactoriesLoaderFactoryClass(),
+getBeanClassLoader());
+Assert.notEmpty(configurations, "No auto configuration classes found in META-INF/spring.factories. If you "
++ "are using a custom packaging, make sure that file is correct.");
+return configurations;
+}
+```
+getSpringFactoriesLoaderFactoryClass方法
+```
+protected Class<?> getSpringFactoriesLoaderFactoryClass() {
+		return EnableAutoConfiguration.class;
+	}
+```
+
+![img_9.png](img_9.png)  
+这里面又一个配置
+![img_10.png](img_10.png)
+
+![img_11.png](img_11.png)
+getCandidateConfigurations方法返回的configurations与spring.factories配置的相同
+
+
+不应该从注解那开始入手分享，网上倒，直到上面有一个spring的refresh方法，
+会执行BeanFactoryPostProcessor类，这个类会解析import注解，之后解析
+
+![img_12.png](img_12.png)
+
+
+*实例化*：只是调用构造方法，在对堆里面开辟存储空间，其中的属性并没有付值操作  
+![img_13.png](img_13.png)
+
+初始化：
