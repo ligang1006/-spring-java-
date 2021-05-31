@@ -1,9 +1,5 @@
 package net.gaven.springdemo.iocmyself.withoutset;
 
-import net.xdclass.iocmyself.withoutset.Autowired;
-import net.xdclass.iocmyself.withoutset.UserController;
-
-import java.lang.reflect.Field;
 import java.util.stream.Stream;
 
 /**

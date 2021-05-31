@@ -112,9 +112,14 @@ System.getProperties()
 
 ###refresh方法必看
 abstractApplicationContext 13个方法
-1、先创建出IOC容器，用来加载读取的配置文件
-2、
 
+1、先创建出IOC容器，用来加载读取的配置文件
+2、创建了一个BeanFactory对象,并获取bean的定义信息
+3、看到prepare字段 就是设置一些属性值的 设置beanFactory工厂属性
+
+
+
+![img_20.png](img_20.png)
 ```
 @Override
 	public void refresh() throws BeansException, IllegalStateException {
@@ -186,3 +191,37 @@ abstractApplicationContext 13个方法
 		}
 	}
 ```
+13个方法  
+#####M1：prepareRefresh(); 设置了时间，创建了一些set 
+```
+protected void prepareRefresh() {
+        ...
+		// Initialize any placeholder property sources in the context environment.
+		initPropertySources();//这里是个空方法，预留的增强使用
+        ...
+    }
+    
+    protected void initPropertySources() {
+		// For subclasses: do nothing by default.
+	}
+```
+#####M2：ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+创建了一个BeanFactory对象,并获取bean信息
+
+
+#####M3：prepareBeanFactory(beanFactory);
+
+// Prepare the bean factory for use in this context.
+prepareBeanFactory(beanFactory);
+#####M
+#####M
+#####M
+#####M
+#####M
+#####M
+#####M
+
+
+
+
+
