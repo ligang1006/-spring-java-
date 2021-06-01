@@ -116,8 +116,10 @@ abstractApplicationContext 13个方法
 1、先创建出IOC容器，用来加载读取的配置文件
 2、创建了一个BeanFactory对象,并获取bean的定义信息
 3、看到prepare字段 就是设置一些属性值的 设置beanFactory工厂属性
-
-
+4、postProcessBeanFactory（）空实现，扩展使用
+5、开始调用
+5、 invokeBeanFactoryPostProcessors(beanFactory)
+6、registerBeanPostProcessors(beanFactory)
 
 ![img_20.png](img_20.png)
 ```
@@ -212,12 +214,31 @@ protected void prepareRefresh() {
 #####M3：prepareBeanFactory(beanFactory);
 
 // Prepare the bean factory for use in this context.
-prepareBeanFactory(beanFactory);
-#####M
-#####M
-#####M
-#####M
-#####M
+prepareBeanFactory(beanFactory);  
+**prepare相关的都是一些属性的设置**  
+设置一些beanFactory的属性
+![img_21.png](img_21.png)
+#####M4：postProcessBeanFactory 
+```
+StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
+// Invoke factory processors registered as beans in the context.
+invokeBeanFactoryPostProcessors(beanFactory);
+// Register bean processors that intercept bean creation.
+registerBeanPostProcessors(beanFactory);
+beanPostProcess.end();
+```
+#####M5 invokeBeanFactoryPostProcessors(beanFactory)
+调用BeanFactoryPostProcessors
+此时 bean工厂创建好了，，xml也读取好了，执行bean工厂的后置处理类
+
+#####M6 registerBeanPostProcessors(beanFactory)
+注册还没实例化
+#####M7 initMessageSource();
+// Initialize message source for this context.
+国际化使用
+#####M8 initApplicationEventMulticaster();
+// Initialize event multicaster for this context.
+创建事件监听器
 #####M
 #####M
 
