@@ -218,7 +218,7 @@ prepareBeanFactory(beanFactory);
 **prepare相关的都是一些属性的设置**  
 设置一些beanFactory的属性
 ![img_21.png](img_21.png)
-#####M4：postProcessBeanFactory 
+#####M4：postProcessBeanFactory 空实现
 ```
 StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
 // Invoke factory processors registered as beans in the context.
@@ -238,9 +238,76 @@ beanPostProcess.end();
 国际化使用
 #####M8 initApplicationEventMulticaster();
 // Initialize event multicaster for this context.
-创建事件监听器
-#####M
-#####M
+创建事件广播器,相关事件的发布
+#####M9 onRefresh();空实现 扩展使用，初始化完成之后的增强
+// Initialize other special beans in specific context subclasses.
+springboot的tomcat启动在这启动的
+#####M10 registerListeners();
+// Check for listener beans and register them.
+#####M11 finishBeanFactoryInitialization(beanFactory)
+// Instantiate all remaining (non-lazy-init) singletons.
+完成bean工厂的初始化操作，  
+**里面的重要方法**
+// Instantiate all remaining (non-lazy-init) singletons.
+DefaultListableBeanFactory类beanFactory.preInstantiateSingletons();--》里面有getBean(beanName);方法实现是AbstractBeanFactory类
+通过反射
+
+doGetBean()；  
+以do开头的方法都是实际干活的方法。
+
+**AbstractBeanFactory类**
+doGetBean()；里面有一个String[] dependsOn = mbd.getDependsOn();方法，该方法确定了类的依赖关系
+
+doGetBean() --》下面还有createBean方法--》实现类AbstractAutowireCapableBeanFactory 里面有Object beanInstance = doCreateBean(beanName, mbdToUse, args);
+--》里面有一个instanceWrapper = createBeanInstance(beanName, mbd, args);方法这个方法有一个  
+// No special handling: simply use no-arg constructor.
+return instantiateBean(beanName, mbd);方法实例化bean（初始化之前实例化）里面有beanInstance = getInstantiationStrategy().instantiate(mbd, beanName, this);方法返回实例（策略）（InstantiationStrategy接口的方法）
+实现类SimpleInstantiationStrategy
+看到构造器 BeanUtils类 return ctor.newInstance(argsWithDefaultValues);Constructor<T> 类中的方法
+
+```
+@Override
+	public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
+		// Don't override the class with CGLIB if no overrides.
+		if (!bd.hasMethodOverrides()) {
+			Constructor<?> constructorToUse;
+			synchronized (bd.constructorArgumentLock) {
+				constructorToUse = (Constructor<?>) bd.resolvedConstructorOrFactoryMethod;
+				if (constructorToUse == null) {
+					final Class<?> clazz = bd.getBeanClass();
+					if (clazz.isInterface()) {
+						throw new BeanInstantiationException(clazz, "Specified class is an interface");
+					}
+					try {
+						if (System.getSecurityManager() != null) {
+							constructorToUse = AccessController.doPrivileged(
+									(PrivilegedExceptionAction<Constructor<?>>) clazz::getDeclaredConstructor);
+						}
+						else {
+							constructorToUse = clazz.getDeclaredConstructor();
+						}
+						bd.resolvedConstructorOrFactoryMethod = constructorToUse;
+					}
+					catch (Throwable ex) {
+						throw new BeanInstantiationException(clazz, "No default constructor found", ex);
+					}
+				}
+			}
+			return BeanUtils.instantiateClass(constructorToUse);
+		}
+		else {
+			// Must generate CGLIB subclass.
+			return instantiateWithMethodInjection(bd, beanName, owner);
+		}
+	}
+```
+此时实例化已经完成
+
+接下来进行初始化
+
+#####M1
+#####M1
+#####M1
 
 
 
