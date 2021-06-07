@@ -193,6 +193,7 @@ abstractApplicationContext 13个方法
 		}
 	}
 ```
+![img_23.png](img_23.png)
 13个方法  
 #####M1：prepareRefresh(); 设置了时间，创建了一些set 
 ```
@@ -305,7 +306,104 @@ return instantiateBean(beanName, mbd);方法实例化bean（初始化之前实�
 
 接下来进行初始化
 
-#####M1
+***初始化过程相对来说就非常复杂了**
+实现类SimpleInstantiationStrategy类的方法
+```
+	protected BeanWrapper instantiateBean(String beanName, RootBeanDefinition mbd) {
+		try {
+			Object beanInstance;
+			if (System.getSecurityManager() != null) {
+				beanInstance = AccessController.doPrivileged(
+						(PrivilegedAction<Object>) () -> getInstantiationStrategy().instantiate(mbd, beanName, this),
+						getAccessControlContext());
+			}
+			else {
+				beanInstance = getInstantiationStrategy().instantiate(mbd, beanName, this);
+			}
+			//获取到实例之后，对实例进行包装
+			BeanWrapper bw = new BeanWrapperImpl(beanInstance);
+			initBeanWrapper(bw);
+			return bw;
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException(
+					mbd.getResourceDescription(), beanName, "Instantiation of bean failed", ex);
+		}
+	}
+```
+```
+protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
+			throws BeanCreationException {
+
+		// Instantiate the bean.
+		BeanWrapper instanceWrapper = null;
+		if (mbd.isSingleton()) {
+			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
+		}
+		if (instanceWrapper == null) {
+		获取包装类
+			instanceWrapper = createBeanInstance(beanName, mbd, args);
+		}
+		Object bean = instanceWrapper.getWrappedInstance();
+		Class<?> beanType = instanceWrapper.getWrappedClass();
+		if (beanType != NullBean.class) {
+			mbd.resolvedTargetType = beanType;
+		}
+
+```
+这里还没到初始化到过程  
+
+这里有一个防止循环引用依赖的方法
+```
+		// Eagerly cache singletons to be able to resolve circular references
+		// even when triggered by lifecycle interfaces like BeanFactoryAware.
+		boolean earlySingletonExposure = (mbd.isSingleton() && this.allowCircularReferences &&
+				isSingletonCurrentlyInCreation(beanName));
+		if (earlySingletonExposure) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Eagerly caching bean '" + beanName +
+						"' to allow for resolving potential circular references");
+			}
+			addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
+		}
+```
+属性值还没有，没有初始化
+```
+	// Initialize the bean instance.
+		Object exposedObject = bean;
+		try {
+			populateBean(beanName, mbd, instanceWrapper);
+			exposedObject = initializeBean(beanName, exposedObject, mbd);
+		}
+```
+上面的代码实现初始化bean  
+AbstractAutowireCapableBeanFactory类的
+protected void populateBean(String beanName, RootBeanDefinition mbd, @Nullable BeanWrapper bw)
+实现bean属性的填充  
+真正实现初始化操作
+exposedObject = initializeBean(beanName, exposedObject, mbd);
+
+里面有
+```
+Object wrappedBean = bean;
+		if (mbd == null || !mbd.isSynthetic()) {
+			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
+		}
+
+		try {
+			invokeInitMethods(beanName, wrappedBean, mbd);
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException(
+					(mbd != null ? mbd.getResourceDescription() : null),
+					beanName, "Invocation of init method failed", ex);
+		}
+		if (mbd == null || !mbd.isSynthetic()) {
+			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
+		}
+```
+#####M12 // Last step: publish corresponding event.
+				finishRefresh();
 #####M1
 #####M1
 
