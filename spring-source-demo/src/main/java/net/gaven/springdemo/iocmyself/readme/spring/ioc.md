@@ -108,17 +108,21 @@ System.getProperties()
 观察者模式。监听器（监听事件）每次完成什么事情之后，再去做什么  
 观察者模式伴随着整个IOC容器
 
+![img_24.png](img_24.png)
+beanDefinitionReader的加载链接
+
+
 ![img_19.png](img_19.png)
 
 ###refresh方法必看
 abstractApplicationContext 13个方法
 
-1、先创建出IOC容器，用来加载读取的配置文件
-2、创建了一个BeanFactory对象,并获取bean的定义信息
-3、看到prepare字段 就是设置一些属性值的 设置beanFactory工厂属性
-4、postProcessBeanFactory（）空实现，扩展使用
-5、开始调用
-5、 invokeBeanFactoryPostProcessors(beanFactory)
+1、先创建出IOC容器，用来加载读取的配置文件  
+2、创建了一个BeanFactory对象,并获取bean的定义信息  
+3、看到prepare字段 就是设置一些属性值的 设置beanFactory工厂属性  
+4、postProcessBeanFactory（）空实现，扩展使用  
+5、开始调用  
+5、 invokeBeanFactoryPostProcessors(beanFactory)  
 6、registerBeanPostProcessors(beanFactory)
 
 ![img_20.png](img_20.png)
