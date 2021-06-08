@@ -24,7 +24,7 @@ The following guides illustrate how to use some features concretely:
 就反转在让你从原来的事必躬亲，转变为现在的享受服务,所以，简单点儿说，IoC的理念就是，
 让别人为你服务！在图2-1中，也就是让IoC Service Provider来为你服务！  
 
-![img.png](chapter2/img.png)
+![img.png](chapter2/img.png)  
 通常情况下，被注入对象会直接依赖于被依赖对象。但是，在IoC的场景中，二者之间通过IoC Service
 Provider来打交道，所有的被注入对象和依赖对象现在由IoC Service Provider统一管理。被注入对象需要
 什么，直接跟IoC Service Provider招呼一声，后者就会把相应的被依赖对象注入到被注入对象中，从而
@@ -55,7 +55,8 @@ IoC Service Provider会检查被注入对象的构造方法，取得它所需要
 应该是由IoC Service Provider来管理的。
 构造方法注入方式比较直观，对象被构造完成后，即进入就绪状态，可以马上使用。这就好比你
 刚进酒吧的门，服务生已经将你喜欢的啤酒摆上了桌面一样。坐下就可马上享受一份清凉与惬意。
-####2、setter方法注入  
+####2、setter方法注入 **推荐的方法**
+
 
 
 ####3、接口注入

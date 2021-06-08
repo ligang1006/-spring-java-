@@ -234,8 +234,126 @@ beanPostProcess.end();
 ```
 #####M5 invokeBeanFactoryPostProcessors(beanFactory)
 调用BeanFactoryPostProcessors
-此时 bean工厂创建好了，，xml也读取好了，执行bean工厂的后置处理类
 
+使用的bf是ConfigurableListableBeanFactory   
+![img_25.png](img_25.png)
+此时 bean工厂创建好了，，xml也读取好了，执行bean工厂的后置处理类
+public interface PriorityOrdered extends Ordered
+这里有相似的代码PostProcessorRegistrationDelegate.java
+```
+        // Do not initialize FactoryBeans here: We need to leave all regular beans
+	// uninitialized to let the bean factory post-processors apply to them!
+	// Separate between BeanDefinitionRegistryPostProcessors that implement
+	// PriorityOrdered, Ordered, and the rest.
+	//会从当前的beanFactory工厂中，获取BeanDefinitionRegistryPostProcessor当前类型的bean
+	String[] postProcessorNames =
+			beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
+
+	// First, invoke the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered.
+	List<BeanDefinitionRegistryPostProcessor> priorityOrderedPostProcessors = new ArrayList<BeanDefinitionRegistryPostProcessor>();
+	for (String ppName : postProcessorNames) {
+	//是否实现了PriorityOrdered接口
+		if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
+			priorityOrderedPostProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
+			processedBeans.add(ppName);
+		}
+	}
+	sortPostProcessors(beanFactory, priorityOrderedPostProcessors);
+	registryPostProcessors.addAll(priorityOrderedPostProcessors);
+	invokeBeanDefinitionRegistryPostProcessors(priorityOrderedPostProcessors, registry);
+	// Next, invoke the BeanDefinitionRegistryPostProcessors that implement Ordered.
+	//bean定义注册后处理器
+	postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
+	List<BeanDefinitionRegistryPostProcessor> orderedPostProcessors = new ArrayList<BeanDefinitionRegistryPostProcessor>();
+	for (String ppName : postProcessorNames) {
+	
+	//注意这里进行了验证重复processedBeans 执行的bean
+		if (!processedBeans.contains(ppName) && beanFactory.isTypeMatch(ppName, Ordered.class)) {
+			orderedPostProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
+			processedBeans.add(ppName);
+		}
+	}
+	sortPostProcessors(beanFactory, orderedPostProcessors);
+	registryPostProcessors.addAll(orderedPostProcessors);
+	invokeBeanDefinitionRegistryPostProcessors(orderedPostProcessors, registry);
+	// Finally, invoke all other BeanDefinitionRegistryPostProcessors until no further ones appear.
+			boolean reiterate = true;
+			while (reiterate) {
+				reiterate = false;
+				postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
+				for (String ppName : postProcessorNames) {
+					if (!processedBeans.contains(ppName)) {
+						BeanDefinitionRegistryPostProcessor pp = beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class);
+						registryPostProcessors.add(pp);
+						processedBeans.add(ppName);
+						pp.postProcessBeanDefinitionRegistry(registry);
+						reiterate = true;
+					}
+				}
+			}
+
+			// Now, invoke the postProcessBeanFactory callback of all processors handled so far.
+			invokeBeanFactoryPostProcessors(registryPostProcessors, beanFactory);
+			invokeBeanFactoryPostProcessors(regularPostProcessors, beanFactory);
+		}
+
+		else {
+			// Invoke factory processors registered with the context instance.
+			invokeBeanFactoryPostProcessors(beanFactoryPostProcessors, beanFactory);
+		}
+
+		// Do not initialize FactoryBeans here: We need to leave all regular beans
+		// uninitialized to let the bean factory post-processors apply to them!
+		String[] postProcessorNames =
+				beanFactory.getBeanNamesForType(BeanFactoryPostProcessor.class, true, false);
+
+		// Separate between BeanFactoryPostProcessors that implement PriorityOrdered,
+		// Ordered, and the rest.
+		List<BeanFactoryPostProcessor> priorityOrderedPostProcessors = new ArrayList<BeanFactoryPostProcessor>();
+		List<String> orderedPostProcessorNames = new ArrayList<String>();
+		List<String> nonOrderedPostProcessorNames = new ArrayList<String>();
+		for (String ppName : postProcessorNames) {
+			if (processedBeans.contains(ppName)) {
+				// skip - already processed in first phase above
+			}
+			else if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
+				priorityOrderedPostProcessors.add(beanFactory.getBean(ppName, BeanFactoryPostProcessor.class));
+			}
+			else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
+				orderedPostProcessorNames.add(ppName);
+			}
+			else {
+				nonOrderedPostProcessorNames.add(ppName);
+			}
+		}
+
+		// First, invoke the BeanFactoryPostProcessors that implement PriorityOrdered.
+		sortPostProcessors(beanFactory, priorityOrderedPostProcessors);
+		invokeBeanFactoryPostProcessors(priorityOrderedPostProcessors, beanFactory);
+
+		// Next, invoke the BeanFactoryPostProcessors that implement Ordered.
+		List<BeanFactoryPostProcessor> orderedPostProcessors = new ArrayList<BeanFactoryPostProcessor>();
+		for (String postProcessorName : orderedPostProcessorNames) {
+			orderedPostProcessors.add(beanFactory.getBean(postProcessorName, BeanFactoryPostProcessor.class));
+		}
+		sortPostProcessors(beanFactory, orderedPostProcessors);
+		invokeBeanFactoryPostProcessors(orderedPostProcessors, beanFactory);
+
+		// Finally, invoke all other BeanFactoryPostProcessors.
+		List<BeanFactoryPostProcessor> nonOrderedPostProcessors = new ArrayList<BeanFactoryPostProcessor>();
+		for (String postProcessorName : nonOrderedPostProcessorNames) {
+			nonOrderedPostProcessors.add(beanFactory.getBean(postProcessorName, BeanFactoryPostProcessor.class));
+		}
+		invokeBeanFactoryPostProcessors(nonOrderedPostProcessors, beanFactory);
+
+		// Clear cached merged bean definitions since the post-processors might have
+		// modified the original metadata, e.g. replacing placeholders in values...
+		beanFactory.clearMetadataCache();
+```
+**核心代码**
+invokeBeanDefinitionRegistryPostProcessors(orderedPostProcessors, registry);
+一个是处理的bean定义注册后处理器
+一个是BeanFactory后处理器
 #####M6 registerBeanPostProcessors(beanFactory)
 注册还没实例化
 #####M7 initMessageSource();
