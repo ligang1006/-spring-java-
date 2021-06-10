@@ -15,12 +15,12 @@ public class BeanTest {
 
     public static void main(String[] args) {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
-        Object a = applicationContext.getBean("a");
-        A a1 = null;
-        if (a instanceof A) {
-            a1 = (A) a;
-            System.out.println("得到beanFactory对象 " + a1.getBeanFactory());
-            System.out.println();
-        }
+//        Object a = applicationContext.getBean("a");
+//        A a1 = null;
+//        if (a instanceof A) {
+//            a1 = (A) a;
+//            System.out.println("得到beanFactory对象 " + a1.getBeanFactory());
+//            System.out.println();
+//        }
     }
 }

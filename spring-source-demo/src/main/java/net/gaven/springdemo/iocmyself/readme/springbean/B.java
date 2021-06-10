@@ -15,7 +15,4 @@ public class B {
         this.c = c;
     }
 
-    public B(C c) {
-        this.c = c;
-    }
 }
