@@ -90,9 +90,11 @@ BeanPostProcessor这个接口也是提供拓展使用的
 ###FactoryBean feign
 feign源码  FeignClientFactoryBean impl FactoryBean  
 
-定制的特殊的对象  
-
-**一般情况下用BeanFactory创建，特殊情况用FactoryBean创建对象**
+****定制的特殊的对象**,比如女娲造人，造出的人都是一样的，这时候想造一个三头六臂的人（只需要一个这样的人，不需要为了他单独创建一个工厂）
+FactoryBean 有三个方法getObject（常用）、getObjectType和isSingleton方法  
+实现此接口的bean不能用作普通bean。此bean暴露的对象是通过getObject()创建的对象，而不是它自身.
+说的再简单点，通过FactoryBean可以创建实例化过程比较复杂的Bean，至于我们以何种方式将FactoryBean的实例注册到Spring容器，在不同的spring版本，可以采用不同的方式
+**一般情况下用BeanFactory创建对象，特殊情况用FactoryBean创建对象**
 
 ![img_17.png](img_17.png)
 
@@ -102,7 +104,7 @@ Environment
 有一个standardEnvironment
 这里有一个
 ![img_18.png](img_18.png)
-System.getenv();
+System.getenv();  
 System.getProperties()  
 ###?如果想在spring运行的不同阶段做不同的事情，应该怎么处理？？？
 观察者模式。监听器（监听事件）每次完成什么事情之后，再去做什么  
