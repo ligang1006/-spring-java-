@@ -1,19 +1,24 @@
 ###遇到的问题
 ###1、maven打包之后，导致ttf文件的字体失效
 
-解决方法忽略
-```
- <!-- resources插件 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
-                <configuration>
-                    <useDefaultDelimiters>true</useDefaultDelimiters>
-                    <nonFilteredFileExtensions>
-                        <nonFilteredFileExtension>ttf</nonFilteredFileExtension>
-                    </nonFilteredFileExtensions>
-                </configuration>
-            </plugin>
+最近项目遇到一个莫名其妙的问题，本地测试没问题，打包成war包之后，文字就变了经过查询找到的问题产生的原因，并记录下来
 
+maven打包时，有些资源文件被编译后会与原文件不同，导致文件不可用
+解决方法是配置maven打包时，不编译指定类型的资源文件，如下：
 ```
+<plugin>
+<artifactId>maven-resources-plugin</artifactId>
+<configuration>
+<nonFilteredFileExtensions>
+<!-- 不需要编译的资源文件 -->
+<nonFilteredFileExtension>ttf</nonFilteredFileExtension>
+<nonFilteredFileExtension>zip</nonFilteredFileExtension>
+</nonFilteredFileExtensions>
+</configuration>
+</plugin>
+```
+
+nonFilteredFileExtension和exclude的区别
+需要注意<nonFilteredFileExtension>和<exclude>的使用区别
+<exclude>指定的文件不会编译也不会打入war包。
+<nonFilteredFileExtension>指定的文件不会编译，但会打入war包。
