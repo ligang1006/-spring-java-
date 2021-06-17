@@ -23,7 +23,7 @@ springboot是一个脚手架，让配置等通过程序自动加载，无需自�
 
   
 
-###1、IOC
+###1、构造SpringApplication
 
 启动时构造
 ```
@@ -69,98 +69,12 @@ As of Spring Framework 5.3, if a particular implementation class name is discove
 ```
 # Logging Systems
 org.springframework.boot.logging.LoggingSystemFactory=\
-org.springframework.boot.logging.logback.LogbackLoggingSystem.Factory,\
-org.springframework.boot.logging.log4j2.Log4J2LoggingSystem.Factory,\
-org.springframework.boot.logging.java.JavaLoggingSystem.Factory
-
+org.springframework.boot.logging.logback.LogbackLoggingSystem.Factory
 # PropertySource Loaders
 org.springframework.boot.env.PropertySourceLoader=\
 org.springframework.boot.env.PropertiesPropertySourceLoader,\
 org.springframework.boot.env.YamlPropertySourceLoader
 
-# ConfigData Location Resolvers
-org.springframework.boot.context.config.ConfigDataLocationResolver=\
-org.springframework.boot.context.config.ConfigTreeConfigDataLocationResolver,\
-org.springframework.boot.context.config.StandardConfigDataLocationResolver
-
-# ConfigData Loaders
-org.springframework.boot.context.config.ConfigDataLoader=\
-org.springframework.boot.context.config.ConfigTreeConfigDataLoader,\
-org.springframework.boot.context.config.StandardConfigDataLoader
-
-# Run Listeners
-org.springframework.boot.SpringApplicationRunListener=\
-org.springframework.boot.context.event.EventPublishingRunListener
-
-# Error Reporters
-org.springframework.boot.SpringBootExceptionReporter=\
-org.springframework.boot.diagnostics.FailureAnalyzers
-
-# Application Context Initializers
-org.springframework.context.ApplicationContextInitializer=\
-org.springframework.boot.context.ConfigurationWarningsApplicationContextInitializer,\
-org.springframework.boot.context.ContextIdApplicationContextInitializer,\
-org.springframework.boot.context.config.DelegatingApplicationContextInitializer,\
-org.springframework.boot.rsocket.context.RSocketPortInfoApplicationContextInitializer,\
-org.springframework.boot.web.context.ServerPortInfoApplicationContextInitializer
-
-# Application Listeners
-org.springframework.context.ApplicationListener=\
-org.springframework.boot.ClearCachesApplicationListener,\
-org.springframework.boot.builder.ParentContextCloserApplicationListener,\
-org.springframework.boot.context.FileEncodingApplicationListener,\
-org.springframework.boot.context.config.AnsiOutputApplicationListener,\
-org.springframework.boot.context.config.DelegatingApplicationListener,\
-org.springframework.boot.context.logging.LoggingApplicationListener,\
-org.springframework.boot.env.EnvironmentPostProcessorApplicationListener
-
-# Environment Post Processors
-org.springframework.boot.env.EnvironmentPostProcessor=\
-org.springframework.boot.cloud.CloudFoundryVcapEnvironmentPostProcessor,\
-org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor,\
-org.springframework.boot.env.RandomValuePropertySourceEnvironmentPostProcessor,\
-org.springframework.boot.env.SpringApplicationJsonEnvironmentPostProcessor,\
-org.springframework.boot.env.SystemEnvironmentPropertySourceEnvironmentPostProcessor,\
-org.springframework.boot.reactor.DebugAgentEnvironmentPostProcessor
-
-# Failure Analyzers
-org.springframework.boot.diagnostics.FailureAnalyzer=\
-org.springframework.boot.context.config.ConfigDataNotFoundFailureAnalyzer,\
-org.springframework.boot.context.properties.IncompatibleConfigurationFailureAnalyzer,\
-org.springframework.boot.context.properties.NotConstructorBoundInjectionFailureAnalyzer,\
-org.springframework.boot.diagnostics.analyzer.BeanCurrentlyInCreationFailureAnalyzer,\
-org.springframework.boot.diagnostics.analyzer.BeanDefinitionOverrideFailureAnalyzer,\
-org.springframework.boot.diagnostics.analyzer.BeanNotOfRequiredTypeFailureAnalyzer,\
-org.springframework.boot.diagnostics.analyzer.BindFailureAnalyzer,\
-org.springframework.boot.diagnostics.analyzer.BindValidationFailureAnalyzer,\
-org.springframework.boot.diagnostics.analyzer.UnboundConfigurationPropertyFailureAnalyzer,\
-org.springframework.boot.diagnostics.analyzer.ConnectorStartFailureAnalyzer,\
-org.springframework.boot.diagnostics.analyzer.NoSuchMethodFailureAnalyzer,\
-org.springframework.boot.diagnostics.analyzer.NoUniqueBeanDefinitionFailureAnalyzer,\
-org.springframework.boot.diagnostics.analyzer.PortInUseFailureAnalyzer,\
-org.springframework.boot.diagnostics.analyzer.ValidationExceptionFailureAnalyzer,\
-org.springframework.boot.diagnostics.analyzer.InvalidConfigurationPropertyNameFailureAnalyzer,\
-org.springframework.boot.diagnostics.analyzer.InvalidConfigurationPropertyValueFailureAnalyzer,\
-org.springframework.boot.diagnostics.analyzer.PatternParseFailureAnalyzer,\
-org.springframework.boot.liquibase.LiquibaseChangelogMissingFailureAnalyzer
-
-# Failure Analysis Reporters
-org.springframework.boot.diagnostics.FailureAnalysisReporter=\
-org.springframework.boot.diagnostics.LoggingFailureAnalysisReporter
-
-# Database Initializer Detectors
-org.springframework.boot.sql.init.dependency.DatabaseInitializerDetector=\
-org.springframework.boot.flyway.FlywayDatabaseInitializerDetector,\
-org.springframework.boot.jdbc.init.DataSourceScriptDatabaseInitializerDetector,\
-org.springframework.boot.liquibase.LiquibaseDatabaseInitializerDetector,\
-org.springframework.boot.orm.jpa.JpaDatabaseInitializerDetector,\
-org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializerDetector
-
-# Depends On Database Initialization Detectors
-org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitializationDetector=\
-org.springframework.boot.sql.init.dependency.AnnotationDependsOnDatabaseInitializationDetector,\
-org.springframework.boot.jdbc.SpringJdbcDependsOnDatabaseInitializationDetector,\
-org.springframework.boot.jooq.JooqDependsOnDatabaseInitializationDetector,\
 org.springframework.boot.orm.jpa.JpaDependsOnDatabaseInitializationDetector
 
 ```
@@ -257,10 +171,182 @@ private <T> List<T> createSpringFactoriesInstances(Class<T> type, Class<?>[] par
 
 setInitializers((Collection) getSpringFactoriesInstances(ApplicationContextInitializer.class))  
 跟到这还是有个疑问？？为什么会到两个spring.factory文件下读取配置？？
-**实际上如果有多个META-INF/spring.factories文件springboot会到每一个classpath下的META-INF/spring.factories下的配置文件加载读取**  
+**实际上如果有多个META-INF/spring.factories文件springboot会到每一个classpath下的META-INF/spring.factories下的配置文件加载读取** 对应的jar包都会放到classpath路径下。  
+
 这里只是取出类包名+类名的全限定名称，并未进行其他操作（实例化）之后方便进行实例化class.forName()
 后续会通过createSpringFactoriesInstances方法实例化操作
 
+之后通过堆栈信息找到main方法所在的类，实例化
+![img_12.png](img_12.png)
+```
+xprivate Class<?> deduceMainApplicationClass() {
+		try {
+			StackTraceElement[] stackTrace = new RuntimeException().getStackTrace();
+			for (StackTraceElement stackTraceElement : stackTrace) {
+				if ("main".equals(stackTraceElement.getMethodName())) {
+					return Class.forName(stackTraceElement.getClassName());
+				}
+			}
+		}
+		catch (ClassNotFoundException ex) {
+			// Swallow and continue
+		}
+		return null;
+	}
+```
+
+Class<?> mainApplicationClass = deduceMainApplicationClass();最后返回Class<?>字节码对象
+###2执行SpringApplication的run方法
+return new SpringApplication(primarySources).run(args);
+```
+public ConfigurableApplicationContext run(String... args) {
+		StopWatch stopWatch = new StopWatch();
+		stopWatch.start();
+		//创建引导上下文，创建了一个默认的引导上下文
+		DefaultBootstrapContext bootstrapContext = createBootstrapContext();
+		ConfigurableApplicationContext context = null;
+		configureHeadlessProperty();
+		SpringApplicationRunListeners listeners = getRunListeners(args);
+		listeners.starting(bootstrapContext, this.mainApplicationClass);
+		try {
+			ApplicationArguments applicationArguments = new DefaultApplicationArguments(args);
+			ConfigurableEnvironment environment = prepareEnvironment(listeners, bootstrapContext, applicationArguments);
+			configureIgnoreBeanInfo(environment);
+			Banner printedBanner = printBanner(environment);
+			context = createApplicationContext();
+			context.setApplicationStartup(this.applicationStartup);
+			prepareContext(bootstrapContext, context, environment, listeners, applicationArguments, printedBanner);
+			refreshContext(context);
+			afterRefresh(context, applicationArguments);
+			stopWatch.stop();
+			if (this.logStartupInfo) {
+				new StartupInfoLogger(this.mainApplicationClass).logStarted(getApplicationLog(), stopWatch);
+			}
+			listeners.started(context);
+			callRunners(context, applicationArguments);
+		}
+		catch (Throwable ex) {
+			handleRunFailure(context, ex, listeners);
+			throw new IllegalStateException(ex);
+		}
+
+		try {
+			listeners.running(context);
+		}
+		catch (Throwable ex) {
+			handleRunFailure(context, ex, null);
+			throw new IllegalStateException(ex);
+		}
+		return context;
+	}
+```
+run方法就是核心代码了，这里需要好好的研究  
+JDK1.6之前需要配置path和classpath classpath需要配置rt.jar和tools.jar  
+设计思路，无非是设置初始化属性，
+
+######（1）设置启动时间
+StopWatch stopWatch = new StopWatch();
+stopWatch.start();
+记录程序的启动时间
+```
+public void start(String taskName) throws IllegalStateException {
+		if (this.currentTaskName != null) {
+			throw new IllegalStateException("Can't start StopWatch: it's already running");
+		}
+		this.currentTaskName = taskName;
+		this.startTimeNanos = System.nanoTime();
+	}
+```
+同样肯定会有启动结束的时间记录，果然找到了stopWatch.stop();方法，
+######（2）创建引导上下文，这里new了一个DefaultBootstrapContext
+![img_13.png](img_13.png)
+######（3）获取运行时的监听器，并启动
+SpringApplicationRunListeners listeners = getRunListeners(args);
+listeners.starting(bootstrapContext, this.mainApplicationClass);
+
+```
+private SpringApplicationRunListeners getRunListeners(String[] args) {
+		Class<?>[] types = new Class<?>[] { SpringApplication.class, String[].class };
+		return new SpringApplicationRunListeners(logger,
+				getSpringFactoriesInstances(SpringApplicationRunListener.class, types, this, args),
+				this.applicationStartup);
+	}
+```
+获取监听器的方法与之前构造设置springApplication的方法相同**getSpringFactoriesInstances**很常用
+这里找到SpringApplicationRunListener的clazz字节码对象  
+org.springframework.boot.SpringApplicationRunListener=\
+org.springframework.boot.context.event.EventPublishingRunListener（发布事件的）
+```
+	public void starting(ConfigurableBootstrapContext bootstrapContext) {
+		this.initialMulticaster
+				.multicastEvent(new ApplicationStartingEvent(bootstrapContext, this.application, this.args));
+	}
+```
+starting()方法会调用一个多播器注册一个ApplicationStartingEvent事件
+这里一定做了一堆别的事情，暂时先不管  
+刚刚从配置spring.factory 中读取了很多监听器，当收到starting事件之后，一定会做想应的事件监听，如果有这样的监听事件之后进行相应的逻辑处理。（观察者模式）  
+######（4）设置应用的属性参数
+ApplicationArguments applicationArguments = new DefaultApplicationArguments(args);
+
+######（5）准备环境
+系统的相关属性参数、jdk的相关属性等，下次需要的时候，直接从这里获取信息即可。  
+
+######（6）打印banner日志
+
+######（7）创建应用上下文
+**什么是上下文？？**
+某个空间包含所需要的属性参数等等之前存在的一些参数变量（保存信息的容器）  
+AnnotationConfigServletWebServerApplicationContext有了上下文之后可以向上下文中设置一些属性  
+
+BeanFactory和applicationContext
+######（8）准备上下文
+prepareContext(bootstrapContext, context, environment, listeners, applicationArguments, printedBanner);  
+```
+private void prepareContext(DefaultBootstrapContext bootstrapContext, ConfigurableApplicationContext context,
+			ConfigurableEnvironment environment, SpringApplicationRunListeners listeners,
+			ApplicationArguments applicationArguments, Banner printedBanner) {
+		context.setEnvironment(environment);
+		postProcessApplicationContext(context);
+		applyInitializers(context);
+		listeners.contextPrepared(context);
+		bootstrapContext.close(context);
+		if (this.logStartupInfo) {
+			logStartupInfo(context.getParent() == null);
+			logStartupProfileInfo(context);
+		}
+		// Add boot specific singleton beans DefaultListableBeanFactory
+		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
+		beanFactory.registerSingleton("springApplicationArguments", applicationArguments);
+		if (printedBanner != null) {
+			beanFactory.registerSingleton("springBootBanner", printedBanner);
+		}
+		if (beanFactory instanceof DefaultListableBeanFactory) {
+			((DefaultListableBeanFactory) beanFactory)
+					.setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding);
+		}
+		if (this.lazyInitialization) {
+			context.addBeanFactoryPostProcessor(new LazyInitializationBeanFactoryPostProcessor());
+		}
+		// Load the sources
+		Set<Object> sources = getAllSources();
+		Assert.notEmpty(sources, "Sources must not be empty");
+		//不加载资源，@Controller @Service @Component等注解
+		load(context, sources.toArray(new Object[0]));
+		listeners.contextLoaded(context);
+	}
+```
+设置一些属性值，这里有一个postProcessApplicationContext（）方法context.getBeanFactory().setConversionService(context.getEnvironment().getConversionService());
+发布事件listeners.contextPrepared(context);  
+```
+public void contextPrepared(ConfigurableApplicationContext context) {
+		this.initialMulticaster
+				.multicastEvent(new ApplicationContextInitializedEvent(this.application, this.args, context));
+	}
+```
+
+
+######
+######
 
 
 ###设置监听器
