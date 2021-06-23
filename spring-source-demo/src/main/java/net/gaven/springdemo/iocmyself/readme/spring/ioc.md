@@ -13,9 +13,9 @@ map放东西由Spring帮我们创建
 
 ###IOC容器的管理
 IOC容器中的对象都是按照需求创建的  
-xml文件和注解等方式，把这些东西（BeanDefinition，源码有BeanDefinitionReader）放到容器中
+xml文件和注解等方式，把这些配置文件通过BeanDefinitionReader读到DeanDefinition中，（放到BeanDefinitionRegister上架子）（BeanDefinition，源码有BeanDefinitionReader）放到容器中
 ![img_1.png](img_1.png)
-BeanDefinitionRegistry 注册Bean
+BeanDefinitionRegistry 注册Bean（类似一个架子）
 ![img_3.png](img_3.png)
 
 事例化好之后
@@ -23,8 +23,9 @@ BeanDefinitionRegistry 注册Bean
 如果要将某一个属性值做修改的话，有100个bean需要设置某个属性（修改bean）
 
 所以DeanDefinition和事例化对象直接还有别的处理  
-打开xml？？
-不实际太慢
+打开xml？？不实际太慢   
+猜想肯定会有相关的reader进行属性的读取操作，不同类型的配置文件有不同的读取器。
+
 ![img_4.png](img_4.png)
 
 BeanDefinition和BeanFactory之间也有东西
@@ -74,7 +75,7 @@ getCandidateConfigurations方法返回的configurations与spring.factories配置
 
 初始化：
   
-这里就是Bean的生命周期的管理
+这里就是Bean的生命周期的管理 
 ###1、先进行 实例化
 BeanFactory接口做了什么事情？？  
 ***bean的生命周期***

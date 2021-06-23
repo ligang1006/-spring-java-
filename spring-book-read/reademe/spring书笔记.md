@@ -18,7 +18,7 @@ The following guides illustrate how to use some features concretely:
 * [Building REST services with Spring](https://spring.io/guides/tutorials/bookmarks/)
 
 #spring 揭秘笔记
-
+ 
 
 ###chapter2
 就反转在让你从原来的事必躬亲，转变为现在的享受服务,所以，简单点儿说，IoC的理念就是，
@@ -60,3 +60,60 @@ IoC Service Provider会检查被注入对象的构造方法，取得它所需要
 
 
 ####3、接口注入
+
+
+### 4.2 重点！！！  BeanFactory的对象注册与依赖绑定方式
+####方法1：直接编码方式
+
+**通过书架BeanDefinitionRegistry 把书的定义 RootBeanDefinition（负责保存对象的所有必要信息） 注册**
+```
+public static void main(String[] args) 
+{ 
+ DefaultListableBeanFactory beanRegistry = new DefaultListableBeanFactory(); 
+ BeanFactory container = (BeanFactory)bindViaCode(beanRegistry); 
+ FXNewsProvider newsProvider = ➥
+ (FXNewsProvider)container.getBean("djNewsProvider"); 
+ newsProvider.getAndPersistNews(); 
+} 
+public static BeanFactory bindViaCode(BeanDefinitionRegistry registry) 
+{ 
+ AbstractBeanDefinition newsProvider = ➥
+ new RootBeanDefinition(FXNewsProvider.class,true); 
+ AbstractBeanDefinition newsListener = ➥
+ new RootBeanDefinition(DowJonesNewsListener.class,true); 
+ AbstractBeanDefinition newsPersister = ➥
+ new RootBeanDefinition(DowJonesNewsPersister.class,true); 
+ // 将bean定义注册到容器中
+ //通过书架 把书的定义注册
+ registry.registerBeanDefinition("djNewsProvider", newsProvider); 
+ registry.registerBeanDefinition("djListener", newsListener); 
+ registry.registerBeanDefinition("djPersister", newsPersister); 
+// 指定依赖关系
+ // 1. 可以通过构造方法注入方式
+ ConstructorArgumentValues argValues = new ConstructorArgumentValues(); 
+ argValues.addIndexedArgumentValue(0, newsListener); 
+ argValues.addIndexedArgumentValue(1, newsPersister); 
+ newsProvider.setConstructorArgumentValues(argValues); 
+ // 2. 或者通过setter方法注入方式  
+ MutablePropertyValues propertyValues = new MutablePropertyValues(); 
+ propertyValues.addPropertyValue(new ropertyValue("newsListener",newsListener)); 
+ propertyValues.addPropertyValue(new PropertyValue("newPersistener",newsPersister)); 
+ newsProvider.setPropertyValues(propertyValues); 
+ 2 // 绑定完成
+ return (BeanFactory)registry; 
+}
+```
+
+BeanDefinition--》书架DeanDefinition--》注册
+
+####方法2：外部配置文件方式
+
+Properties文件格式和XML文件---> BeanDefinitionReader--读取到-->BeanDefinition---->DeanDefinitionRegister（架子）完成Bean的注册和加载  
+伪代码
+```
+BeanDefinitionRegistry beanRegistry = <某个BeanDefinitionRegistry实现类，通常为➥
+DefaultListableBeanFactory>; 
+BeanDefinitionReader beanDefinitionReader = new BeanDefinitionReaderImpl(beanRegistry); 
+beanDefinitionReader.loadBeanDefinitions("配置文件路径"); 
+// 现在我们就取得了一个可用的BeanDefinitionRegistry实例
+```
