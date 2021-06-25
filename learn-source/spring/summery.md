@@ -8,7 +8,7 @@
 
 
 
-###1、BeanDefinitionBeanFactory和Bean的关系
+###1、BeanDefinition、BeanFactory和Bean的关系
 
 
 BeanDefinition（原材料）--->BeanFactory（工厂）--->Bean（产品）
@@ -23,7 +23,7 @@ BeanDefinition（原材料）--->BeanFactory（工厂）--->Bean（产品）
 （5）初始化  
 （6）初始化后AOP、生成代理对象
 
-###4、
+###4、AbstractDeanDefinition
 ![img_2.png](img_8.png)
 ###spring中的一些继承和实现关系
 ![img.png](img.png)
