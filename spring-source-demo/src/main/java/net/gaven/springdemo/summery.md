@@ -41,3 +41,31 @@ BeanDefinitionRegistry就像图书馆的书架，所有的书是放在书架上�
 虽然你
 还书或者借书都是跟图书馆（也就是BeanFactory，或许BookFactory可能更好些）打交道，但书架才
 是图书馆存放各类图书的地方。所以，书架相对于图书馆来说，就是它的“BookDefinitionRegistry”。
+###PlaceholderConfigurerSupport
+占位符配置支持，把配置文件中的资源属性读取解析如properties和xml配置文件  
+
+Abstract base class for property resource configurers that resolve placeholders in bean definition property values. Implementations pull values from a properties file or other property source into bean definitions.
+The default placeholder syntax follows the Ant / Log4J / JSP EL style:
+${...}
+Example XML bean definition:
+<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"/>
+<property name="driverClassName" value="${driver}"/>
+<property name="url" value="jdbc:${dbname}"/>
+</bean>
+
+Example properties file:
+driver=com.mysql.jdbc.Driver
+dbname=mysql:mydb
+
+###ConfigurationClassPostProcessor
+![img_6.png](img_6.png)
+BeanFactoryPostProcessor used for bootstrapping processing of @Configuration classes.  
+Registered by default when using <context:annotation-config/> or <context:component-scan/>.   
+Otherwise, may be declared manually as with any other BeanFactoryPostProcessor.
+This post processor is priority-ordered as it is important that any Bean methods declared in @Configuration classes have their corresponding bean definitions registered before any other BeanFactoryPostProcessor executes.
+
+###ConfigurationClassParser
+Parses a Configuration class definition, populating a collection of ConfigurationClass objects (parsing a single Configuration class may result in any number of ConfigurationClass objects because one Configuration class may import another using the Import annotation).  
+This class helps separate the concern of parsing the structure of a Configuration class from the concern of registering BeanDefinition objects based on the content of that model (with the exception of @ComponentScan annotations which need to be registered immediately).  
+This ASM-based implementation avoids reflection and eager class loading in order to interoperate effectively with lazy class loading in a Spring ApplicationContext.
+###

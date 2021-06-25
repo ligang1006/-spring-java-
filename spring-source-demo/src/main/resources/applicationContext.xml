@@ -2,22 +2,27 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-<!--    <bean id="a" class="net.gaven.springdemo.iocmyself.readme.springbean.A " init-method="init">-->
-<!--        &lt;!&ndash;    <bean id="a" class="net.gaven.springdemo.iocmyself.readme.springbean.A " init-method="init">&ndash;&gt;-->
+    <!--    <bean id="a" class="net.gaven.springdemo.iocmyself.readme.springbean.A " init-method="init">-->
+    <!--        &lt;!&ndash;    <bean id="a" class="net.gaven.springdemo.iocmyself.readme.springbean.A " init-method="init">&ndash;&gt;-->
 
-<!--    </bean>-->
+    <!--    </bean>-->
     <bean id="b" class="net.gaven.springdemo.iocmyself.readme.springbean.B">
         <property name="c" ref="c"></property>
-<!--        构造器的循环依赖是解决不了的-->
-<!--                <constructor-arg name="c" ref="c">-->
+        <!--        构造器的循环依赖是解决不了的-->
+        <!--                <constructor-arg name="c" ref="c">-->
 
-<!--                </constructor-arg>-->
+        <!--                </constructor-arg>-->
     </bean>
     <bean id="c" class="net.gaven.springdemo.iocmyself.readme.springbean.C">
         <property name="b" ref="b"></property>
         <!--        <constructor-arg>-->
         <!--            -->
         <!--        </constructor-arg>-->
+    </bean>
+
+    <!--    aware接口的使用-->
+    <bean id="awareClassTest" class="net.gaven.springdemo.iocmyself.readme.spring.aware.AwareClassTest">
+        <property name="status" value="1"></property>
     </bean>
 
 

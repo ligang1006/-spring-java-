@@ -1,5 +1,6 @@
 package net.gaven.springdemo.reflection;
 
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -7,7 +8,7 @@ import org.springframework.context.annotation.Bean;
  * @create: 2021/5/31 9:48 上午
  **/
 
-public class Person {
+public class Person implements BeanNameAware {
 
     private String name;
     private int age;
@@ -26,5 +27,10 @@ public class Person {
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    @Override
+    public void setBeanName(String name) {
+        this.name=name;
     }
 }

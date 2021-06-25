@@ -117,3 +117,18 @@ BeanDefinitionReader beanDefinitionReader = new BeanDefinitionReaderImpl(beanReg
 beanDefinitionReader.loadBeanDefinitions("配置文件路径"); 
 // 现在我们就取得了一个可用的BeanDefinitionRegistry实例
 ```
+###方法3：注解的方式
+
+Spring 2.5发布的基于注解的依赖注入方式，如果不使用classpath-scanning功能的话，仍然部分
+依赖于“基于XML配置文件”的依赖注入方式。  
+@Autowired是这里的主角，它的存在将告知Spring容器需要为当前对象注入哪些依赖对象。而
+@Component则是配合Spring 2.5中新的classpath-scanning功能使用的。现在我们只要再向Spring的配置
+文件中增加一个“触发器”，使用@Autowired和@Component标注的类就能获得依赖对象的注入了。
+![img.png](img.png)
+
+####xml配置讲解
+1.《bean》之唯我独尊  
+   《beans>是XML配置文件中最顶层的元素，它下面可以包含0或者1个<description>和多个
+   <bean>以及<import>或者<alias>，如图4-4所示。
+![img_1.png](img_1.png)
+

@@ -77,10 +77,25 @@ getCandidateConfigurations方法返回的configurations与spring.factories配置
   
 这里就是Bean的生命周期的管理 
 ###1、先进行 实例化
-BeanFactory接口做了什么事情？？  
+BeanFactory接口做了什么事情？？
+从实例化到初始化这一整个步骤，代表了Bean的生命周期。
 ***bean的生命周期***
 ![img_14.png](img_14.png)
+实例化-->填充数据-->执行aware接口的方法-->初始化
+想获取Bean在容器中的名字怎么办？？  
+```
+获取Bean的名字实现BeanNameAware接口
+public class Teacher implement  BeanNameAware{
+    private String beanName;
+    
+    @Override
+    public void setBeanName(String name){
+    this.beanName=name;
+    }
+}
 
+```
+aware的作用：方便spring中的bean对象，来获取容器中的相关属性
 注意**BeanPostProcessor**的类型
 ![img_15.png](img_15.png)  
 
@@ -493,6 +508,8 @@ protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable
 		}
 ```
 属性值还没有，没有初始化
+init
+填充属性是通过set方法实现
 ```
 	// Initialize the bean instance.
 		Object exposedObject = bean;
