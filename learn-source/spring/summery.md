@@ -1,5 +1,5 @@
 
-###看源码的方法
+###1、看源码的方法
 1、不要忽略源码的注解  
 2、不要开始的时候就深入细节，死扣某一个  
 3、大胆猜测、大胆验证 8分靠猜  
@@ -23,9 +23,9 @@ BeanDefinition（原材料）--->BeanFactory（工厂）--->Bean（产品）
 （5）初始化  
 （6）初始化后AOP、生成代理对象
 
-###4、AbstractDeanDefinition
+###4、AbstractBeanDefinition
 ![img_2.png](img_8.png)
-###spring中的一些继承和实现关系
+###5、StandardEnvironment
 ![img.png](img.png)
 standardEnvironment 是prepareRefresh()方法创建的环境，如果private ConfigurableEnvironment environment;
 environment为空则创建一个标准的环境  
@@ -33,6 +33,11 @@ environment为空则创建一个标准的环境
 
 
 **PropertyResolver：属性解析器。** 用于解析相应key的value
+
+###6、BeanDefinitionBeanFactory和Bean的关系
+
+
+BeanDefinition（原材料）--->BeanFactory（工厂）--->Bean（产品）
 
 ![img_4.png](img_4.png)
 DefaultListableBeanFactory  
