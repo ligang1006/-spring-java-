@@ -1,4 +1,4 @@
-readme/springboot.md
+readme/springboot源码/springboot.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
