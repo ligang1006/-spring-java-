@@ -6,7 +6,7 @@
 
 ### reflection 扫描全包的方法 Reflection工具的使用
 
-###spring中的一些继承和实现关系
+###spring中的一些继承和实现关系 
 ![img.png](img.png)
 standardEnvironment 是prepareRefresh()方法创建的环境，如果private ConfigurableEnvironment environment;
 environment为空则创建一个标准的环境  
