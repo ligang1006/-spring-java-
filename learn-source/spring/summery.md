@@ -92,4 +92,100 @@ This post processor is priority-ordered as it is important that any Bean methods
 Parses a Configuration class definition, populating a collection of ConfigurationClass objects (parsing a single Configuration class may result in any number of ConfigurationClass objects because one Configuration class may import another using the Import annotation).  
 This class helps separate the concern of parsing the structure of a Configuration class from the concern of registering BeanDefinition objects based on the content of that model (with the exception of @ComponentScan annotations which need to be registered immediately).  
 This ASM-based implementation avoids reflection and eager class loading in order to interoperate effectively with lazy class loading in a Spring ApplicationContext.
-###
+
+
+###ClassPathXmlApplicationContext
+Create a new ClassPathXmlApplicationContext with the given parent, loading the definitions from the given XML files.  
+
+Params:  
+configLocations – array of resource locations  
+refresh – whether to automatically refresh the context, loading all bean definitions and creating all singletons.   
+Alternatively, call refresh manually after further configuring the context.  
+parent – the parent context
+作用创建一个新的上下文环境，加载xml配置的BeanDefinition
+spring启动之后会调用这个构造方法，方法中的参数为配置资源文件的数组  
+refresh 规定了是否可以自动的更新上下文，加载并创建所以的单例Bean
+或者，在进一步配置上下文后手动调用refresh。
+parent – 父上下文
+```
+public ClassPathXmlApplicationContext(
+			String[] configLocations, boolean refresh, @Nullable ApplicationContext parent)
+			throws BeansException {
+
+		super(parent);
+		setConfigLocations(configLocations);
+		if (refresh) {
+			refresh();
+		}
+	}
+```
+###ClassPathXmlApplicationContext类的refresh方法是继承ConfigurableApplicationContext.java方法的
+
+###spring中refresh方法里的的重要方法
+
+// Initialize any placeholder property sources in the context environment.
+####initPropertySources();
+该方法供我们自己实现，可以增强在上下文的环境中初始化配置符的属性资源  
+####refreshBeanFactory()
+refresh方法中obtainFreshBeanFactory获取新鲜的bean工厂方法  
+
+// Tell the subclass to refresh the internal bean factory.
+ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+
+在使用spring的时候，我门会做很多配置，
+做了那么多多配置，到底是什么时候把这些配置加载进来呢？？
+通过debug阅读源码发现在AbstractRefreshableApplicationContext接口的refreshBeanFactory()方法能够实现配置文件的加载。
+该方法中有一个loadBeanDefinitions(beanFactory);加载bean的定义的方法。入参是beanFactory这里是DefaultListableBeanFactory
+```
+	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) throws BeansException, IOException {
+		// Create a new XmlBeanDefinitionReader for the given BeanFactory.
+		XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
+
+		// Configure the bean definition reader with this context's
+		// resource loading environment.
+		beanDefinitionReader.setEnvironment(this.getEnvironment());
+		beanDefinitionReader.setResourceLoader(this);
+		beanDefinitionReader.setEntityResolver(new ResourceEntityResolver(this));
+
+		// Allow a subclass to provide custom initialization of the reader,
+		// then proceed with actually loading the bean definitions.
+		initBeanDefinitionReader(beanDefinitionReader);
+		loadBeanDefinitions(beanDefinitionReader);
+	}
+
+```
+这是一个私有的方法，参数是一个BeanFactory
+
+1、内部主要创建了一个XmlBeanDefinitionReader用来读解析xml的配置文件。  
+2、之后设置一些属性  
+3、把刚才设置的bean初始化的读取器进行初始化操作  
+4、通过bean的读取器加载配置  
+这里主要说一下loadBeanDefinition方法
+```
+	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
+		Resource[] configResources = getConfigResources();
+		if (configResources != null) {
+			reader.loadBeanDefinitions(configResources);
+		}
+		//这里把全部xml配置加载出来  xxx.xml applicationContext.xml
+
+		String[] configLocations = getConfigLocations();
+		if (configLocations != null) {
+			reader.loadBeanDefinitions(configLocations);
+		}
+	}
+```
+接下来看一下这个加载Bean定义的实现细节
+```
+ * Load bean definitions from the specified resource location.
+	 * <p>The location can also be a location pattern, provided that the
+	 * ResourceLoader of this bean definition reader is a ResourcePatternResolver.
+	 * @param location the resource location, to be loaded with the ResourceLoader
+	 * (or ResourcePatternResolver) of this bean definition reader
+	 * @param actualResources a Set to be filled with the actual Resource objects
+	 * that have been resolved during the loading process. May be {@code null}
+	 * to indicate that the caller is not interested in those Resource objects.
+	 * @return the number of bean definitions found
+```
+
+![img_7.png](img_7.png)

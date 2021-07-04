@@ -132,6 +132,12 @@ beanDefinitionReader的加载链接
 
 ![img_19.png](img_19.png)
 
+
+实例化--》填充属性--》执行aware接口需要施行的方法--》beanPostProcessor(动态代理的实现)  
+
+填充属性执行完aware方法时，此时已经有对象了，此时是否能够修改对象bean？？  
+
+aop-->动态代理(jdk/cglib)-->代理对象
 ###refresh方法必看
 abstractApplicationContext 13个方法
 
