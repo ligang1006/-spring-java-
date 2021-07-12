@@ -51,13 +51,13 @@ ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 创建的默认工厂
 AbstractRefreshableApplicationContext创建  
 
-
+###7、常见的类
 
 ![img_3.png](img_3.png)
-###BeanDefinition
+####7.1BeanDefinition
 ![img_5.png](img_5.png)
 
-###BeanDefinitionRegistry
+####7.2BeanDefinitionRegistry
 Interface for registries that hold bean definitions, for example RootBeanDefinition and ChildBeanDefinition instances. Typically implemented by BeanFactories that internally work with the AbstractBeanDefinition hierarchy.
 This is the only interface in Spring's bean factory packages that encapsulates （封装）registration of bean definitions. The standard BeanFactory interfaces only cover access to a fully configured factory instance.
 Spring's bean definition readers expect to work on an implementation of this interface. Known implementors within the Spring core are DefaultListableBeanFactory and GenericApplicationContext
@@ -65,7 +65,7 @@ BeanDefinitionRegistry就像图书馆的书架，所有的书是放在书架上�
 虽然你
 还书或者借书都是跟图书馆（也就是BeanFactory，或许BookFactory可能更好些）打交道，但书架才
 是图书馆存放各类图书的地方。所以，书架相对于图书馆来说，就是它的“BookDefinitionRegistry”。
-###PlaceholderConfigurerSupport
+####7.3PlaceholderConfigurerSupport
 占位符配置支持，把配置文件中的资源属性读取解析如properties和xml配置文件  
 
 Abstract base class for property resource configurers that resolve placeholders in bean definition property values. Implementations pull values from a properties file or other property source into bean definitions.
@@ -189,3 +189,5 @@ ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 ```
 
 ![img_7.png](img_7.png)
+
+###

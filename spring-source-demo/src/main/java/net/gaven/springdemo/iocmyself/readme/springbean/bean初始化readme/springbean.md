@@ -63,7 +63,7 @@ singletonFactories      三级缓存 b:匿名内部类
 
 ![img_5.png](img_5.png)
 放到了三级缓存
-![img_6.png](img_6.png)
+![img_6.png](img_6.png) 
 
 ![img_7.png](img_7.png)
 此时的c实例还没初始化，b是引用不到c的

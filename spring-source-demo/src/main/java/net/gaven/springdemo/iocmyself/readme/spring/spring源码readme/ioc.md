@@ -39,6 +39,7 @@ internalConfigurationProcessor
 
 @SpringBootApplication->@EnableAutoConfiguration
 ![img_8.png](img_8.png)
+
 AutoConfigurationImportSelector
 ```
 protected List<String> getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) {
@@ -81,7 +82,121 @@ BeanFactory接口做了什么事情？？
 从实例化到初始化这一整个步骤，代表了Bean的生命周期。
 ***bean的生命周期***
 ![img_14.png](img_14.png)
-实例化-->填充数据-->执行aware接口的方法-->初始化
+![img_27.png](img_27.png)
+实例化-->填充数据-->执行aware接口的方法-->before-->初始化-->after  
+
+
+问题？？  
+应用程序运行期间能否读取到系统的环境变量或者系统属性？？
+当然可以 environment  
+System.getEnv() System.getProperties()  
+
+如果想在spring的生命周期不同阶段做不同的处理工作，我该怎么办？？  
+观察者模式---监听器监听事件，广播器和多播器  
+
+实例化是一个非常复杂的工作，需要很多准备工作。例如监听器、事件多播器等，还有这里只是注册并没有运行BeanPostProcessor的增强等  
+
+
+AbstractAutoProxyCreator是BeanPostProcessor的实现
+
+BeanPostProcessor
+```
+/**
+	 * Create a proxy with the configured interceptors if the bean is
+	 * identified as one to proxy by the subclass.
+	 * @see #getAdvicesAndAdvisorsForBean
+	 */
+	@Override
+	public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) {
+		if (bean != null) {
+			Object cacheKey = getCacheKey(bean.getClass(), beanName);
+			if (this.earlyProxyReferences.remove(cacheKey) != bean) {
+				return wrapIfNecessary(bean, beanName, cacheKey);
+			}
+		}
+		return bean;
+	}
+```
+最后通过工厂获取代理类
+```
+protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
+		if (StringUtils.hasLength(beanName) && this.targetSourcedBeans.contains(beanName)) {
+			return bean;
+		}
+		if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
+			return bean;
+		}
+		if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
+			this.advisedBeans.put(cacheKey, Boolean.FALSE);
+			return bean;
+		}
+
+		// Create proxy if we have advice.
+		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
+		if (specificInterceptors != DO_NOT_PROXY) {
+			this.advisedBeans.put(cacheKey, Boolean.TRUE);
+			Object proxy = createProxy(
+					bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
+			this.proxyTypes.put(cacheKey, proxy.getClass());
+			return proxy;
+		}
+
+		this.advisedBeans.put(cacheKey, Boolean.FALSE);
+		return bean;
+	}
+```
+createProxy创建代理方法，点进去会发现
+```
+protected Object createProxy(Class<?> beanClass, @Nullable String beanName,
+			@Nullable Object[] specificInterceptors, TargetSource targetSource) {
+
+		if (this.beanFactory instanceof ConfigurableListableBeanFactory) {
+			AutoProxyUtils.exposeTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName, beanClass);
+		}
+
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.copyFrom(this);
+
+		if (!proxyFactory.isProxyTargetClass()) {
+			if (shouldProxyTargetClass(beanClass, beanName)) {
+				proxyFactory.setProxyTargetClass(true);
+			}
+			else {
+				evaluateProxyInterfaces(beanClass, proxyFactory);
+			}
+		}
+
+		Advisor[] advisors = buildAdvisors(beanName, specificInterceptors);
+		proxyFactory.addAdvisors(advisors);
+		proxyFactory.setTargetSource(targetSource);
+		customizeProxyFactory(proxyFactory);
+
+		proxyFactory.setFrozen(this.freezeProxy);
+		if (advisorsPreFiltered()) {
+			proxyFactory.setPreFiltered(true);
+		}
+
+		// Use original ClassLoader if bean class not locally loaded in overriding class loader
+		ClassLoader classLoader = getProxyClassLoader();
+		if (classLoader instanceof SmartClassLoader && classLoader != beanClass.getClassLoader()) {
+			classLoader = ((SmartClassLoader) classLoader).getOriginalClassLoader();
+		}
+		return proxyFactory.getProxy(classLoader);
+	}
+```
+上面的方法的注解是创建一个AOP的代理
+
+proxyFactory.getProxy(classLoader);
+
+```
+public Object getProxy(@Nullable ClassLoader classLoader) {
+		return createAopProxy().getProxy(classLoader);
+	}
+```
+![img_26.png](img_26.png)
+在这里可看到jdk和cglib动态代理的实现。
+
+
 想获取Bean在容器中的名字怎么办？？  
 ```
 获取Bean的名字实现BeanNameAware接口
@@ -237,7 +352,7 @@ protected void prepareRefresh() {
 	}
 ```
 #####M2：ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
-创建了一个BeanFactory对象,并获取bean信息
+创建了一个BeanFactory对象,并获取bean信息 
 
 
 #####M3：prepareBeanFactory(beanFactory);
@@ -448,7 +563,7 @@ return instantiateBean(beanName, mbd);方法实例化bean（初始化之前实�
 		}
 	}
 ```
-此时实例化已经完成
+此时实例化已经完成  
 
 接下来进行初始化
 
@@ -499,6 +614,10 @@ protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable
 ```
 这里还没到初始化到过程  
 
+
+学习顺序
+spring-->springmvc-->springboot-->mybatis-->springcloud
+
 这里有一个防止循环引用依赖的方法
 ```
 		// Eagerly cache singletons to be able to resolve circular references
@@ -516,6 +635,57 @@ protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable
 属性值还没有，没有初始化
 init
 填充属性是通过set方法实现
+**填充属性的方法，只会把xml中配置的属性填进去，BeanName属性是Aware接口进行填充的。**
+![img_28.png](img_28.png)
+invokeAwareMethods(beanName,bean)进行调用Aware接口的方法
+![img_29.png](img_29.png)
+beanName设置成功了 为什么environment没有设置？？
+![img_30.png](img_30.png)
+那environment是在哪设置的呢？？  
+BeanPostProcessor设置
+```
+protected Object initializeBean(String beanName, Object bean, @Nullable RootBeanDefinition mbd) {
+		if (System.getSecurityManager() != null) {
+			AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+				invokeAwareMethods(beanName, bean);
+				return null;
+			}, getAccessControlContext());
+		}
+		else {
+			invokeAwareMethods(beanName, bean);
+		}
+
+		Object wrappedBean = bean;
+		if (mbd == null || !mbd.isSynthetic()) {
+		//这里就将environment设置了
+			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
+		}
+
+		try {
+			invokeInitMethods(beanName, wrappedBean, mbd);
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException(
+					(mbd != null ? mbd.getResourceDescription() : null),
+					beanName, "Invocation of init method failed", ex);
+		}
+		if (mbd == null || !mbd.isSynthetic()) {
+			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
+		}
+
+		return wrappedBean;
+	}
+```
+//这里就将environment设置了
+wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);  
+
+invokeInitMethod（beanName，wrapperBean，mdb）调用用户自定义的init方法  
+
+
+after方法  
+
+
+
 ```
 	// Initialize the bean instance.
 		Object exposedObject = bean;

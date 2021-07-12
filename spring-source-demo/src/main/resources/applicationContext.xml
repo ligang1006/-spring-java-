@@ -20,10 +20,17 @@
         <!--        </constructor-arg>-->
     </bean>
 
-    <!--    aware接口的使用-->
-    <bean id="awareClassTest" class="net.gaven.springdemo.iocmyself.readme.spring.aware.AwareClassTest">
-        <property name="status" value="1"></property>
-    </bean>
+
+
+
+
+
+
+
+<!--    &lt;!&ndash;    aware接口的使用&ndash;&gt;-->
+<!--    <bean id="awareClassTest" class="net.gaven.springdemo.iocmyself.readme.spring.aware.AwareClassTest">-->
+<!--        <property name="status" value="1"></property>-->
+<!--    </bean>-->
 
 
 </beans>

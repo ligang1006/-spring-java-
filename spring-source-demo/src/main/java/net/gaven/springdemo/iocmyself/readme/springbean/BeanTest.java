@@ -1,6 +1,7 @@
 package net.gaven.springdemo.iocmyself.readme.springbean;
 
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import sun.applet.Main;
@@ -15,7 +16,9 @@ public class BeanTest {
 
     public static void main(String[] args) {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
-//        Object a = applicationContext.getBean("a");
+
+//        BeanDefinitionRegistry beanDefinitionRegistry=new
+        //        Object a = applicationContext.getBean("a");
 //        A a1 = null;
 //        if (a instanceof A) {
 //            a1 = (A) a;

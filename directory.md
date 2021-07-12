@@ -13,8 +13,29 @@
 
 ### interview-----------------------------面经
 ### learn-source------------------源码的学习整理
-1、[spring](learn-source/spring/summery.md) 
-2、JDK
+####1、[spring](learn-source/spring/summery.md)   
+1.1 BeanDefinition、BeanFactory和Bean的关系    
+1.2 BeanFactory的核心实现子接口  
+1.3 Bean的生命周期  
+1.4 AbstractBeanDefinition  
+1.5 StandardEnvironment  
+1.6 BeanDefinitionBeanFactory和Bean的关系  
+1.7 常见的类  
+    1.7.1 BeanDefinition  
+    1.7.2 BeanDefinitionRegistry  
+    1.7.3 PlaceholderConfigurerSupport  
+    1.7.4 ConfigurationClassPostProcessor    
+    1.7.5 ConfigurationClassParser  
+    1.7.6 ClassPathXmlApplicationContext
+    1.7.7 
+    1.7.8 
+    1.7.9 
+
+1.8 循环依赖问题
+三级缓存  
+DefaultSign
+
+####2、JDK
 
 
 ### Spring-book-read------Spring揭秘的读书笔记整理
