@@ -186,3 +186,65 @@ abstractApplicationContext 13个方法
 		}
 	}
 ```
+
+### 启动父类的构造方法
+```
+public AbstractApplicationContext() {
+		this.resourcePatternResolver = getResourcePatternResolver();
+	}
+```
+创建一个新的（无父类）AbstractApplicationContext对象
+/** Synchronization monitor for the "refresh" and "destroy". */
+private final Object startupShutdownMonitor = new Object();
+这个锁防止refresh和destroy方法被中断
+```
+protected ResourcePatternResolver getResourcePatternResolver() {
+		//创建资源模式解析器（用来解析xml的配置文件）
+		return new PathMatchingResourcePatternResolver(this);
+	}
+```
+PathMatchingResourcePatternResolver这个类有很多属性  
+
+PathMatcher pathMatcher = new AntPathMatcher();ant风格的路径表达式  
+dtd
+xsd
+xml的验证方式（规则）
+
+
+
+
+###创建环境对象，包含系统属性
+
+spring中设置环境  
+```
+spring.activity.profile
+```
+
+
+setConfigLocations(configLocations);
+```
+	public void setConfigLocations(@Nullable String... locations) {
+		if (locations != null) {
+			Assert.noNullElements(locations, "Config locations must not be null");
+			this.configLocations = new String[locations.length];
+			for (int i = 0; i < locations.length; i++) {
+				this.configLocations[i] = resolvePath(locations[i]).trim();
+			}
+		}
+		else {
+			this.configLocations = null;
+		}
+	}
+```
+其中传入的参数locations 配置文件的名称为spring-${username}.xml
+spring-${username}.xml
+其中${username}是一个变量替换，系统中的一个变量值
+```
+protected String resolvePath(String path) {
+		return getEnvironment().resolveRequiredPlaceholders(path);
+	}
+```
+为什么要设getEnvironment（） 没有读过任何配置文件中的属性值，系统环境变量进行替换。创建一个标准的StandardEnvironment(无参数的构造方法)  
+这种子类只有无参数的构造如果有父类，在父类打断点，就能够进入
+父类AbstractEnvironment的属性如下
+![img_20.png](img_20.png)
