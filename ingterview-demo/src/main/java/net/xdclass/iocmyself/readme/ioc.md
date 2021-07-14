@@ -248,3 +248,140 @@ protected String resolvePath(String path) {
 这种子类只有无参数的构造如果有父类，在父类打断点，就能够进入
 父类AbstractEnvironment的属性如下
 ![img_20.png](img_20.png)
+
+最终的生效是子类的方法
+```
+    @Override
+	protected void customizePropertySources(MutablePropertySources propertySources) {
+		propertySources.addLast(
+				new PropertiesPropertySource(SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, getSystemProperties()));
+		propertySources.addLast(
+				new SystemEnvironmentPropertySource(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, getSystemEnvironment()));
+	}
+```
+子类（无参数构造方法）调用父构造，父类的实现为空，最终会调用子类的实现。  
+
+
+###对占位符进行的处理 
+${}的替换，配置文件中会对这些占位符进行替换操作  
+```
+protected String resolvePath(String path) {
+		return getEnvironment().resolveRequiredPlaceholders(path);
+	}
+```
+会执行下面的方法
+```
+@Override
+	public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
+		if (this.strictHelper == null) {
+			this.strictHelper = createPlaceholderHelper(false);
+		}
+		return doResolvePlaceholders(text, this.strictHelper);
+	}
+```
+```
+public String replacePlaceholders(String value, PlaceholderResolver placeholderResolver) {
+		Assert.notNull(value, "'value' must not be null");
+		return parseStringValue(value, placeholderResolver, null);
+	}
+
+	protected String parseStringValue(
+			String value, PlaceholderResolver placeholderResolver, @Nullable Set<String> visitedPlaceholders) {
+
+		int startIndex = value.indexOf(this.placeholderPrefix);
+		if (startIndex == -1) {
+			return value;
+		}
+
+		StringBuilder result = new StringBuilder(value);
+		while (startIndex != -1) {
+			int endIndex = findPlaceholderEndIndex(result, startIndex);
+			if (endIndex != -1) {
+				String placeholder = result.substring(startIndex + this.placeholderPrefix.length(), endIndex);
+				String originalPlaceholder = placeholder;
+				if (visitedPlaceholders == null) {
+					visitedPlaceholders = new HashSet<>(4);
+				}
+				if (!visitedPlaceholders.add(originalPlaceholder)) {
+					throw new IllegalArgumentException(
+							"Circular placeholder reference '" + originalPlaceholder + "' in property definitions");
+				}
+				// Recursive invocation, parsing placeholders contained in the placeholder key.
+				placeholder = parseStringValue(placeholder, placeholderResolver, visitedPlaceholders);
+				// Now obtain the value for the fully resolved key...
+				String propVal = placeholderResolver.resolvePlaceholder(placeholder);
+				if (propVal == null && this.valueSeparator != null) {
+					int separatorIndex = placeholder.indexOf(this.valueSeparator);
+					if (separatorIndex != -1) {
+						String actualPlaceholder = placeholder.substring(0, separatorIndex);
+						String defaultValue = placeholder.substring(separatorIndex + this.valueSeparator.length());
+						propVal = placeholderResolver.resolvePlaceholder(actualPlaceholder);
+						if (propVal == null) {
+							propVal = defaultValue;
+						}
+					}
+				}
+				if (propVal != null) {
+				//递归的解析占位符，所以能够使用   ${  bb${}}这嵌套的形式
+					// Recursive invocation, parsing placeholders contained in the
+					// previously resolved placeholder value.
+					//解析
+					propVal = parseStringValue(propVal, placeholderResolver, visitedPlaceholders);
+					result.replace(startIndex, endIndex + this.placeholderSuffix.length(), propVal);
+					if (logger.isTraceEnabled()) {
+						logger.trace("Resolved placeholder '" + placeholder + "'");
+					}
+					startIndex = result.indexOf(this.placeholderPrefix, startIndex + propVal.length());
+				}
+				else if (this.ignoreUnresolvablePlaceholders) {
+					// Proceed with unprocessed value.
+					startIndex = result.indexOf(this.placeholderPrefix, endIndex + this.placeholderSuffix.length());
+				}
+				else {
+					throw new IllegalArgumentException("Could not resolve placeholder '" +
+							placeholder + "'" + " in value \"" + value + "\"");
+				}
+				visitedPlaceholders.remove(originalPlaceholder);
+			}
+			else {
+				startIndex = -1;
+			}
+		}
+		return result.toString();
+	}
+```
+propVal = parseStringValue(propVal, placeholderResolver, visitedPlaceholders);方法
+递归解析操作
+
+// Now obtain the value for the fully resolved key...
+String propVal = placeholderResolver.resolvePlaceholder(placeholder);
+
+PropertySourcesPropertyResolver.java类的
+protected String getPropertyAsRawString(String key) {
+return getProperty(key, String.class, false);
+}
+```
+@Nullable
+	protected <T> T getProperty(String key, Class<T> targetValueType, boolean resolveNestedPlaceholders) {
+		if (this.propertySources != null) {
+			for (PropertySource<?> propertySource : this.propertySources) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Searching for key '" + key + "' in PropertySource '" +
+							propertySource.getName() + "'");
+				}
+				Object value = propertySource.getProperty(key);
+				if (value != null) {
+					if (resolveNestedPlaceholders && value instanceof String) {
+						value = resolveNestedPlaceholders((String) value);
+					}
+					logKeyFound(key, propertySource, value);
+					return convertValueIfNecessary(value, targetValueType);
+				}
+			}
+		}
+		if (logger.isTraceEnabled()) {
+			logger.trace("Could not find key '" + key + "' in any property source");
+		}
+		return null;
+	}
+```
