@@ -124,9 +124,53 @@ public ClassPathXmlApplicationContext(
 ###spring中refresh方法里的的重要方法
 
 // Initialize any placeholder property sources in the context environment.
-####initPropertySources();
-该方法供我们自己实现，可以增强在上下文的环境中初始化配置符的属性资源  
-####refreshBeanFactory()
+####1.7.7  initPropertySources();
+该方法供我们自己实现，可以增强在上下文的环境中初始化配置符的属性资源
+
+实现方法
+![img_10.png](img_10.png)
+
+因为ClassPathXmlApplicationContext继承了AbstractApplicationContext
+所以只要重写initPropertySources方法即可。
+```
+public class MyClassPathXmlApplicationContext extends ClassPathXmlApplicationContext {
+
+    //这里需要注意，要调用父类的方法，否则无法实现调用
+    public MyClassPathXmlApplicationContext(String... configLocations){
+        super(configLocations);
+    }
+
+    @Override
+    protected void initPropertySources() {
+        System.out.println("扩展initPropertySource");
+        //这里添加了一个name属性到Environment里面，以方便我们在后面用到
+        getEnvironment().getSystemProperties().put("name","xx");
+        //这里要求Environment中必须包含username属性，如果不包含，则抛出异常
+        getEnvironment().setRequiredProperties("username");
+    }
+}
+public class Test {
+
+    public static void main(String[] args) {
+        MyClassPathXmlApplicationContext ac = new MyClassPathXmlApplicationContext("applicationContext.xml");
+
+//        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring-${username}.xml");
+    }
+}
+
+
+```
+这里做了两个扩展  
+1、向Environment中添加了一个name属性值。  
+2、我们设置了一个必要的系统属性username，当Environment中不包含username属性时系统会抛出异常。
+
+调用完这个方法之后，会进行校验如果没有这个参数会报错    
+```
+// Validate that all properties marked as required are resolvable:
+// see ConfigurablePropertyResolver#setRequiredProperties
+getEnvironment().validateRequiredProperties();
+```
+####1.7.8 refreshBeanFactory()
 refresh方法中obtainFreshBeanFactory获取新鲜的bean工厂方法  
 
 // Tell the subclass to refresh the internal bean factory.
@@ -190,4 +234,60 @@ ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 ![img_7.png](img_7.png)
 
-###
+### 1.7.9initServletPropertySource
+WebApplicationContextUtils类的方法
+```
+public static void initServletPropertySources(MutablePropertySources sources, @Nullable ServletContext servletContext, @Nullable ServletConfig servletConfig) {
+        Assert.notNull(sources, "'propertySources' must not be null");
+        String name = "servletContextInitParams";
+        if (servletContext != null && sources.get(name) instanceof StubPropertySource) {
+            sources.replace(name, new ServletContextPropertySource(name, servletContext));
+        }
+
+        name = "servletConfigInitParams";
+        if (servletConfig != null && sources.get(name) instanceof StubPropertySource) {
+            sources.replace(name, new ServletConfigPropertySource(name, servletConfig));
+        }
+
+    }
+```
+
+
+###能够进行扩展的地方
+
+![img_11.png](img_11.png)
+
+####initPropertySources();MyClassPathXmlApplicationContext.java 配置校验一些属性值  
+```// Store pre-refresh ApplicationListeners...
+		if (this.earlyApplicationListeners == null) {
+			this.earlyApplicationListeners = new LinkedHashSet<>(this.applicationListeners);
+		}
+		else {
+			// Reset local application listeners to pre-refresh state.
+			this.applicationListeners.clear();
+			this.applicationListeners.addAll(this.earlyApplicationListeners);
+		}
+
+		// Allow for the collection of early ApplicationEvents,
+		// to be published once the multicaster is available...
+		this.earlyApplicationEvents = new LinkedHashSet<>();
+```
+this.earlyApplicationListeners == null这里为啥要进行==null的判断？  
+初始化  某些时候这里不为nullspringboot中有很多ApplicationListener  
+这些listener也可以实现扩展。  
+ ####是否能够覆盖Bean的定义和允许解决循环依赖问题
+allowBeanDefinitionOverride 属性
+allowCircularReference
+
+这两个属性能够进行拓展  
+customizeBeanFactory方法进行属性的设置
+```
+protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
+		if (this.allowBeanDefinitionOverriding != null) {
+			beanFactory.setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding);
+		}
+		if (this.allowCircularReferences != null) {
+			beanFactory.setAllowCircularReferences(this.allowCircularReferences);
+		}
+	}
+```

@@ -385,3 +385,11 @@ return getProperty(key, String.class, false);
 		return null;
 	}
 ```
+在解析过程中，propertySource是通过 系统环境中获取的。
+propertySource.getProperty(key)  key是${}中的变量值。  
+ 
+
+AbstractRefreshableConfigApplicationContext类  configLocations
+
+###initPropertySources()方法的拓展
+initPropertySources()方法是

@@ -27,9 +27,9 @@
     1.7.4 ConfigurationClassPostProcessor    
     1.7.5 ConfigurationClassParser  
     1.7.6 ClassPathXmlApplicationContext
-    1.7.7 
-    1.7.8 
-    1.7.9 
+    1.7.7 initPropertySources();
+    1.7.8 refreshBeanFactory()
+    1.7.9 initServletPropertySource覆盖servlet属性值
 
 1.8 循环依赖问题
 三级缓存  

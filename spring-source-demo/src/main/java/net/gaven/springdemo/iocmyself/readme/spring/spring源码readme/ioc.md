@@ -265,6 +265,8 @@ abstractApplicationContext 13个方法
 6、registerBeanPostProcessors(beanFactory)
 
 ![img_20.png](img_20.png)
+![img_31.png](img_31.png)
+
 ```
 @Override
 	public void refresh() throws BeansException, IllegalStateException {
@@ -725,7 +727,58 @@ Object wrappedBean = bean;
 #####M1
 #####M1
 
+### 工厂的创建
+创建工厂的时候，为什么有一个refreshBeanFactory方法  
+当前容器启动之前，有可能已经启动其他的Bean工厂  
+怎么可能会有Bean工厂的呢？？？  
+启动方式是ClassPathApplicationContext方式启动，web项目中有new ClassPath的代码，没有，web项目有其他的工厂。  
+SpringWvc中这个refreshBeanFactory方法是调用不到的。。别的时期进行工厂的创建    
+创建过程是曲折的，会调用一堆的父类的构造方法，最终会到AbstractBeanFactory方法。  
+```
+    @Nullable
+    private BeanFactory parentBeanFactory;
 
+	/** ClassLoader to resolve bean class names with, if necessary. */
+	@Nullable
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
+	/** ClassLoader to temporarily resolve bean class names with, if necessary. */
+	@Nullable
+	private ClassLoader tempClassLoader;
+	...
 
+```
+上面的这些参数都会进行初始化操作的。
+
+AbstractAutowireCapableBeanFactory类有是否自动处理循环依赖的问题  
+ignoreDependencyInterface方法实现对aware的过滤操作，后面ton m
+```
+public AbstractAutowireCapableBeanFactory() {
+		super();
+		ignoreDependencyInterface(BeanNameAware.class);
+		ignoreDependencyInterface(BeanFactoryAware.class);
+		ignoreDependencyInterface(BeanClassLoaderAware.class);
+		if (NativeDetector.inNativeImage()) {
+			this.instantiationStrategy = new SimpleInstantiationStrategy();
+		}
+		else {
+			this.instantiationStrategy = new CglibSubclassingInstantiationStrategy();
+		}
+	}
+```
+allowBeanDefinitionOverride 属性
+allowCircularReference
+
+这两个属性能够进行拓展  
+customizeBeanFactory方法进行属性的设置
+```
+protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
+		if (this.allowBeanDefinitionOverriding != null) {
+			beanFactory.setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding);
+		}
+		if (this.allowCircularReferences != null) {
+			beanFactory.setAllowCircularReferences(this.allowCircularReferences);
+		}
+	}
+```
 
