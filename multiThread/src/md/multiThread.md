@@ -76,8 +76,9 @@ cpu为线程分配时间片，时间片非常短（毫秒级别），cpu不停�
 ![img_4.png](img_4.png)
 
 断点调试的时候，这里直接进入到Thread.sleep方法没有执行inCreate方法
-
+![img_5.png](img_5.png)
 ###
+requestBody（只能通过JSOn传）否则报错
 ###
 ###
 ##
